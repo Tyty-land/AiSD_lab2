@@ -149,7 +149,7 @@ public:
 	}
 	void push_head(const TYPE& value)
 	{
-		Node* next = this->_head;
+		/*Node* next = this->_head;
 		TYPE new_content = value;
 		TYPE old_content = TYPE();
 		for (size_t i = 0; i < this->_size; i++)
@@ -162,7 +162,12 @@ public:
 		}
 		next->_next = new Node(new_content);
 		next->_next->_early = next;
-		this->_size += 1;
+		this->_size += 1;*/
+		Node* new_node = new Node(value);
+		new_node->_next = this->_head;
+		this->_head->_early = new_node;
+		this->_head = new_node;
+		this->_size++;
 	}
 	void push_head(const LinkedList& other)
 	{
@@ -187,43 +192,23 @@ public:
 		}
 		next->_next = new Node(value);
 		next->_next->_early = next;
-		this->_size += 1;
+		this->_size++;
 	}
 	void push_tail(const LinkedList& other)
 	{
-		Node* next_this = this->_head;
-		for (size_t i = 1; i < this->_size; i++)
-		{
-			next_this = next_this->_next;
-		}
 		Node* next_other = other.getHead();
-		for (size_t i = 1; i < other.getSize(); i++)
+		for (size_t i = 0; i < other.getSize(); i++)
 		{
-			Node* early_this = next_this;
-			next_other = next_other->_next;
-			next_this->_next = new Node(next_other->_сontent);
-			next_this = next_this->_next;
-			next_this->_early = early_this;
+			this->push_tail(next_other->_сontent);
 		}
 		this->_size += other.getSize();
 	}
 	void pop_head()
 	{
-		Node* next = this->_head;
-		Node* early = nullptr;
-		for (size_t i = 0; i < this->_size - 1; i++)
-		{
-			early = next;
-			next = next->_next;
-			early->_сontent = next->_сontent;
-		}
-		if (this->_size != 1)
-		{
-			if (early->_next != nullptr)
-				delete early->_next;
-			early->_next = nullptr;
-			this->_size -= 1;
-		}
+		this->_head = this->_head->_next;
+		delete this->_head->_early;
+		this->_head->_early = nullptr;
+		this->_size--;
 	}
 	void pop_tail()
 	{
@@ -234,7 +219,7 @@ public:
 		}
 		delete next->_next;
 		next->_next = nullptr;
-		this->_size -= 1;
+		this->_size--;
 	}
 	LinkedList delete_node(const TYPE& value)
 	{
@@ -296,7 +281,8 @@ public:
 		}
 		this->_size = other.getSize();
 	}
-	TYPE& operator[](size_t index) const
+
+	TYPE& operator[](size_t index)
 	{
 		Node* next = this->_head;
 		if (index >= 0 && index < this->_size)
@@ -310,6 +296,21 @@ public:
 		else
 			throw "(operator[]) - Индекс вышел за пределы списка";
 	}
+	TYPE operator[](size_t index) const
+	{
+		Node* next = this->_head;
+		if (index >= 0 && index < this->_size)
+		{
+			for (size_t i = 0; i < index; i++)
+			{
+				next = next->_next;
+			}
+			return next->_сontent;
+		}
+		else
+			throw "(operator[]) - Индекс вышел за пределы списка";
+	}
+
 	LinkedList<TYPE> operator+(const LinkedList<TYPE>& other)
 	{
 		size_t max_size = this->getMaxSize(other);
@@ -445,11 +446,11 @@ void mult_two_numbers(LinkedList<TYPE>& num_first, LinkedList<TYPE>& num_second)
 {
 	LinkedList<TYPE> num_first_cp = transformator(num_first);
 	LinkedList<TYPE> num_second_cp = transformator(num_second);
-	LinkedList<TYPE> temp = add_two_numbers(num_first_cp, num_first_cp, "");
+	LinkedList<TYPE> temp = num_first_cp;
 	int cnt = 0;
 	for (size_t i = 0; i < num_second_cp.getSize(); i++)
 		cnt += num_second_cp[i] * pow(10, num_second_cp.getSize() - 1 - i);
-	for (int i = 1; i < cnt - 1; i++)
+	for (int i = 0; i < cnt - 1; i++)
 		temp = add_two_numbers(temp, num_first_cp, "");
 	for (size_t i = 0; i < temp.getSize(); i++)
 		cout << temp[i];
@@ -467,7 +468,7 @@ ostream& operator<<(ostream& out, const LinkedList<TYPE> linked_list)
 		if (i + 1 < linked_list.getSize())
 			out << ", ";
 	}
-	out << "]" << endl;
+	out << " ]" << endl;
 	return out;
 }
 
@@ -477,58 +478,30 @@ int main()
 	try
 	{
 		//Проверка функционала
-		/*LinkedList<string> Zero;
-		LinkedList<string> g(1, 10);
-		LinkedList<string> G(2, 5);
-		Zero = G;
-		for (size_t i = 0; i < g.getSize(); i++)
-			cout << g[i] << endl;
-		cout << endl;
-		g.push_head("12.4");
-		for (size_t i = 0; i < g.getSize(); i++)
-			cout << g[i] << endl;
-		cout << endl;
-		for (size_t i = 0; i < G.getSize(); i++)
-			cout << Zero[i] << endl;
-		cout << endl;
-		g.pop_head();
-		for (size_t i = 0; i < g.getSize(); i++)
-			cout << g[i] << endl;
-		cout << endl;
-		g.push_head(Zero);
-		for (size_t i = 0; i < g.getSize(); i++)
-			cout << g[i] << endl;
-		for (size_t i = 4; i < 7; i++)
-			g[i] = g[0];
-		cout << endl;
-		for (size_t i = 0; i < g.getSize(); i++)
-			cout << g[i] << endl;
-		cout << endl;
-		g = g.delete_node(g[0]);
-		for (size_t i = 0; i < g.getSize(); i++)
-			cout << g[i] << endl;*/
-		//Задание №9 первая часть лабы
-		int n = 2;
+		/*LinkedList<int> list_1(10, "");
+		for (int i = 0; i < 10; i++)
+			list_1[i] = 1;
+		list_1[2] = 2;
+		list_1[4] = 34;
+		list_1[5] = 5;
+		cout << list_1;
+		list_1 = list_1.delete_node(1);
+		cout << list_1;*/
+		//задание №9 первая часть лабы
+		int n = 10;
 		int flat = 100;
 		drawn_home_list(create_home_list(flat, n), flat, n);
-		//Задание №2 вторая часть лабы
-		cout << "Номер 2:" << endl;
-		LinkedList<double> list_1(5, "1");
-		LinkedList<double> list_2(3, "");
-		for (size_t i = 0; i < list_2.getSize(); i++)
-		{
-			list_1[i] = (i + 1)*2;
-			list_2[i] = (i + 1)*2;
-		}
-		list_1[3] = 4.125135;
-		list_1[4] = 120.6;
-		list_1[0] = 100.5;
-		list_2[2] = 60.6;
-		cout << "Ввиде числа = ";
+		//задание №2 вторая часть лабы
+		cout << "номер 2:" << endl;
+		LinkedList<int> list_1(1, "1");
+		LinkedList<int> list_2(1, "");
+		list_1[0] = 9999;
+		list_2[0] = 1;
+		cout << "ввиде числа = ";
 		add_two_numbers(list_2, list_1);
-		cout << "Ввиде числа = ";
+		cout << "ввиде числа = ";
 		mult_two_numbers(list_1, list_2);
-		cout << "Первый список = " << list_1 << "Второй список = " << list_2;
+		cout << "первый список = " << list_1 << "второй список = " << list_2;
 	}
 	catch (const char* ex)
 	{
